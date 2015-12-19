@@ -71,16 +71,17 @@
   [config        :- DirectoryDeployConfig
    local-details :- Details
    s3-details    :- Details]
-  (let [aws-creds     (:aws-creds config)
-        bucket        (:bucket config)
-        path          (:path config)
-        local-root    (:local-root config)]
+  (let [aws-creds         (:aws-creds config)
+        auto-content-type (:auto-content-type config false)
+        bucket            (:bucket config)
+        path              (:path config)
+        local-root        (:local-root config)]
     (doseq [[rel-path data] local-details
             :when (not (contains? s3-details rel-path))
             :let [obj-key   (if path (str path "/" rel-path) rel-path)
                   file-path (str local-root "/" rel-path)]]
       (case (:type data)
-        :file (s3/put-file! aws-creds bucket obj-key file-path)
+        :file (s3/put-file! aws-creds auto-content-type bucket obj-key file-path)
         :dir  (s3/put-folder! aws-creds bucket obj-key)))))
 
 (s/defn ^:private sync-s3!
@@ -99,12 +100,13 @@
   [config        :- DirectoryDeployConfig
    local-details :- Details
    s3-details    :- Details]
-  (let [aws-creds   (:aws-creds config)
-        bucket      (:bucket config)
-        path        (:path config)
-        local-root  (:local-root config)
-        mutual-keys (c-set/intersection (set (keys local-details))
-                                        (set (keys s3-details)))]
+  (let [aws-creds         (:aws-creds config)
+        auto-content-type (:auto-content-type config false)
+        bucket            (:bucket config)
+        path              (:path config)
+        local-root        (:local-root config)
+        mutual-keys       (c-set/intersection (set (keys local-details))
+                                              (set (keys s3-details)))]
     (doseq [mutual-key mutual-keys
             :let [local-data (get local-details mutual-key)
                   s3-data    (get s3-details mutual-key)
@@ -112,7 +114,7 @@
                   file-path  (str local-root "/" mutual-key)]
             :when (and (= :file (:type local-data))
                        (not= (:md5 local-data) (:md5 s3-data)))]
-      (s3/put-file! aws-creds bucket obj-key file-path))))
+      (s3/put-file! aws-creds auto-content-type bucket obj-key file-path))))
 
 (defn deploy-directory
   "Deploy a local directory to S3. Will attempt to synchronize the local

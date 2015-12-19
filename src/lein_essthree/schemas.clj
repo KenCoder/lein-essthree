@@ -11,6 +11,7 @@
   {:bucket                     s/Str
 
    (s/optional-key :aws-creds) AWSCreds
+   (s/optional-key :auto-content-type) s/Bool
    (s/optional-key :path)      s/Str})
 
 (s/defschema ^:private BaseDeployConfig

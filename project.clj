@@ -11,6 +11,7 @@
                  [org.springframework.build/aws-maven "5.0.0.RELEASE"
                   :exclusions [joda-time]]
                  [funcool/cuerdas "0.6.0"]
+                 [ring/ring-core "1.4.0"]
                  [me.raynes/fs "1.4.6"]
                  [pandect "0.5.4"]
                  [pathetic "0.5.1"]
